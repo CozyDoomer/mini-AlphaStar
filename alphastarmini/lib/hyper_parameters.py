@@ -172,7 +172,7 @@ AlphaStar_Arch_Hyper_Parameters = ArchHyperParameters(batch_size=int(512 / Alpha
                                                       map_channels=24,
                                                       scatter_channels=1,  # 0 or 1
                                                       init_net_params=1,
-                                                      use_action_type_mask=0,
+                                                      use_action_type_mask=1,
                                                       use_unit_type_entity_mask=0,
                                                       use_predict_step_mul=1,
                                                       positional_encoding_time=1,
@@ -213,7 +213,7 @@ MiniStar_Arch_Hyper_Parameters = ArchHyperParameters(batch_size=int(16 * 8 / P.B
                                                      map_channels=24,
                                                      scatter_channels=1,  # 0 or 1
                                                      init_net_params=1,
-                                                     use_action_type_mask=1,
+                                                     use_action_type_mask=0,
                                                      use_unit_type_entity_mask=0,
                                                      positional_encoding_time=0,
                                                      use_predict_step_mul=0,
@@ -306,6 +306,7 @@ AgentInterfaceFormatParams = namedtuple('AgentInterfaceFormatParams', ['feature_
 AlphaStar_Agent_Interface_Format_Params = AgentInterfaceFormatParams(feature_dimensions=sc2_env.Dimensions(screen=64, minimap=64),
                                                                      rgb_dimensions=None,
                                                                      raw_resolution=64,  # This value is Improtant! It will affect the value of entity x 
+                                                                     # This value is Improtant! It will affect the value of entity x 
                                                                      # and y, also change the target_location in the action of replays.
                                                                      # If none, it will use the map size. Recommand, use 64 or 256.
                                                                      action_space=None,
@@ -352,6 +353,7 @@ StarCraft_Hyper_Parameters = StarCraftHyperParameters(screen_size=64,  # 128 com
                                                       max_buffer_ids=len(Buffs),  # from 0 to 275 TODO: change to value in static_data
                                                       max_add_on_type=50,  # TODO: change to value in static_data
                                                       map_name='Simple64',  # "Simple64" or "AbyssalReef"
+                                                      # map_name='AbyssalReef', 
                                                       game_version='3.16.1',  # "3.16.1" or "4.0.2" or "4.10"
                                                       )  
 

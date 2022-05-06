@@ -46,31 +46,32 @@ if __name__ == "__main__":
     # ------------------------
 
     # # 1. we transform the replays to pickle
+
     # transform_replay_data.test(on_server=False)
 
     # 2. we use tensor to do supervised learning
     # fit_lr_by_tensor.test(on_server=P.on_server)
-    sl_train_by_tensor.test(on_server=P.on_server)
+    # sl_train_by_tensor.test(on_server=P.on_server)
 
     # 3. we use RL environment to evaluate SL model
-    if not P.on_server:
-        from alphastarmini.core.rl import rl_eval_sl
-        rl_eval_sl.test(on_server=P.on_server)
-    else:
-        from alphastarmini.core.rl import mp_rl_eval_sl
-        mp_rl_eval_sl.test(on_server=P.on_server)
+    # if not P.on_server:
+    #     from alphastarmini.core.rl import rl_eval_sl
+    #     rl_eval_sl.test(on_server=P.on_server)
+    # else:
+    #     from alphastarmini.core.rl import mp_rl_eval_sl
+    #     mp_rl_eval_sl.test(on_server=P.on_server)
 
     # # 4. we use SL model to do reinforcement learning against computer
-    # from alphastarmini.core.rl import rl_vs_inner_bot_mp
-    # rl_vs_inner_bot_mp.test(on_server=P.on_server, replay_path=P.replay_path)
+    from alphastarmini.core.rl import rl_vs_inner_bot_mp
+    rl_vs_inner_bot_mp.test(on_server=P.on_server, replay_path=P.replay_path)
 
     # # 5. we use RL environment to evaluate SL model
-    # from alphastarmini.core.rl import rl_eval_rl
-    # rl_eval_rl.test(on_server=P.on_server)
+    from alphastarmini.core.rl import rl_eval_rl
+    rl_eval_rl.test(on_server=P.on_server)
 
     # # 6. we use SL model and replays to do reinforcement learning
-    # from alphastarmini.core.rl import rl_train_with_replay
-    # rl_train_with_replay.test(on_server=P.on_server, replay_path=P.replay_path)
+    from alphastarmini.core.rl import rl_train_with_replay
+    rl_train_with_replay.test(on_server=P.on_server, replay_path=P.replay_path)
 
     # ------------------------
     #

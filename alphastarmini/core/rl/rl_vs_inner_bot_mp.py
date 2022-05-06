@@ -51,21 +51,13 @@ debug = False
 speed = False
 
 
-SIMPLE_TEST = not P.on_server
-if SIMPLE_TEST:
-    MAX_EPISODES = 1
-    ACTOR_NUMS = 1
-    PARALLEL = 1
-    GAME_STEPS_PER_EPISODE = 18000  
-    MAX_FRAMES = 18000 * 5
-else:
-    MAX_EPISODES = 4 * 4 * 500
-    ACTOR_NUMS = 2  # 2
-    PARALLEL = 8 + 7 * 1
-    GAME_STEPS_PER_EPISODE = 18000
-    MAX_FRAMES = 18000 * MAX_EPISODES
+MAX_EPISODES = 500
+ACTOR_NUMS = 2
+PARALLEL = 1
+GAME_STEPS_PER_EPISODE = 18000
+MAX_FRAMES = 18000 * MAX_EPISODES
 
-STATIC_NUM = 100  # ACTOR_NUMS * PARALLEL
+STATIC_NUM = 2  # 100 = ACTOR_NUMS * PARALLEL
 TRAIN_ITERS = MAX_EPISODES * ACTOR_NUMS * PARALLEL
 
 USE_UPDATE_LOCK = False
@@ -878,10 +870,7 @@ def Parameter_Server(synchronizer, q_winloss, q_points, v_steps, use_cuda_device
 
 
 def test(on_server=False, replay_path=None):
-    if SIMPLE_TEST:
-        use_cuda_device = False
-    else:
-        use_cuda_device = True
+    use_cuda_device = True
 
     torch.manual_seed(RANDOM_SEED)
     mp.set_start_method('spawn')
@@ -899,7 +888,7 @@ def test(on_server=False, replay_path=None):
                                        restore=RESTORE, device=device_learner)
             for race in [Race.protoss]
         },
-        main_players=1, 
+        main_players=1,
         main_exploiters=0,
         league_exploiters=0)
 
