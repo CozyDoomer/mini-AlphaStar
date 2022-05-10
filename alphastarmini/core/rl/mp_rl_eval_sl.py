@@ -41,16 +41,12 @@ debug = False
 speed = False
 
 
-SIMPLE_TEST = not P.on_server
-if SIMPLE_TEST:
-    raise NotImplementedError
-
 SAVE_STATISTIC = True
 SAVE_REPLAY = True
 
 # 24000
-GAME_STEPS_PER_EPISODE = 18000  
-MAX_EPISODES = 5
+GAME_STEPS_PER_EPISODE = 100000
+MAX_EPISODES = 1
 ACTOR_NUMS = 2
 STEP_MUL = 16
 DIFFICULTY = 1
@@ -63,7 +59,6 @@ IS_TRAINING = False
 MAP_NAME = SCHP.map_name  # P.map_name "Simple64" "AbyssalReef"
 USE_PREDICT_STEP_MUL = AHP.use_predict_step_mul
 WIN_THRESHOLD = 4000
-
 
 RANDOM_SEED = 1
 VERSION = SCHP.game_version

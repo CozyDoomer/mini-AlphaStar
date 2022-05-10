@@ -179,20 +179,26 @@ class SC2ReplayDataset(Dataset):
         return int(max_len / self.seq_length)
 
 
-class ReplayTensorDataset(TensorDataset):
+def get_replay_data(replay_path, index, seq_len, debug=False):
+    features, labels = torch.load(replay_path)
+    features = features[index:index+seq_len]
+    labels = labels[index:index+seq_len]
+    if debug:
+        print("features.shape:", features.shape)
+        print("labels.shape:", labels.shape)
 
-    # seq_len=AHP.sequence_length
-    def __init__(self, *tensors: Tensor, seq_len) -> None:
-        assert all(tensors[0].size(0) == tensor.size(0) for tensor in tensors), "Size mismatch between tensors"
-        self.tensors = tensors
+    return features, labels
+
+
+class ReplayTensorDataset(TensorDataset):
+    def __init__(self, replay_path, seq_len) -> None:
+        self.replay_size = torch.load(replay_path)[0].shape[0]
+        self.replay_path = replay_path
         self.seq_len = seq_len
 
     def __getitem__(self, index):
-        return tuple(tensor[index:index + self.seq_len] for tensor in self.tensors)
+        tensors = get_replay_data(self.replay_path, index, self.seq_len)
+        return tensors
 
     def __len__(self):
-        return self.tensors[0].size(0) - self.seq_len + 1
-
-
-def test():
-    pass
+        return self.replay_size - self.seq_len + 1

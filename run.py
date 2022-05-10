@@ -33,12 +33,8 @@ from alphastarmini.core.arch import (action_type_head, agent, arch_model,
                                      location_head, queue_head, scalar_encoder,
                                      selected_units_head, spatial_encoder,
                                      target_unit_head)
-from alphastarmini.core.sl import (
-    load_pickle,
-    transform_replay_data,
-    sl_train_by_tensor,
-    fit_lr_by_tensor
-)
+from alphastarmini.core.sl import (fit_lr_by_tensor, load_pickle,
+                                   sl_train_by_tensor, transform_replay_data)
 
 if __name__ == "__main__":
     print("run init")
@@ -46,19 +42,20 @@ if __name__ == "__main__":
     # ------------------------
 
     # # 1. we transform the replays to pickle
-    # transform_replay_data.test(on_server=False)
+    transform_replay_data.test(on_server=False)
 
     # 2. we use tensor to do supervised learning
     # fit_lr_by_tensor.test(on_server=P.on_server)
     sl_train_by_tensor.test(on_server=P.on_server)
 
     # 3. we use RL environment to evaluate SL model
-    if not P.on_server:
-        from alphastarmini.core.rl import rl_eval_sl
-        rl_eval_sl.test(on_server=P.on_server)
-    else:
-        from alphastarmini.core.rl import mp_rl_eval_sl
-        mp_rl_eval_sl.test(on_server=P.on_server)
+    # if not P.on_server:
+    #     from alphastarmini.core.rl import rl_eval_sl
+    #     rl_eval_sl.test(on_server=P.on_server)
+    # else:
+    from alphastarmini.core.rl import mp_rl_eval_sl
+
+    mp_rl_eval_sl.test(on_server=P.on_server)
 
     # # 4. we use SL model to do reinforcement learning against computer
     # from alphastarmini.core.rl import rl_vs_inner_bot_mp

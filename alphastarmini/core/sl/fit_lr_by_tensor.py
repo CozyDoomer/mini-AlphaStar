@@ -133,34 +133,16 @@ torch.manual_seed(SLTHP.seed)
 np.random.seed(SLTHP.seed)
 
 
-def getReplayData(path, replay_files, from_index=0, end_index=None):
+def get_replay_data(path, replay_files, from_index=0, end_index=None):
     td_list = []
-    for i, replay_file in enumerate(tqdm(replay_files)):
+    replay_files = replay_files[from_index:end_index]
+    for i, replay_file in enumerate(tqdm(replay_files, total=len(replay_files))):
         try:
             replay_path = path + replay_file
-            # print('replay_path:', replay_path) if 1 else None
-
-            do_write = False
-            if i >= from_index:
-                if end_index is None:
-                    do_write = True
-                elif end_index is not None and i < end_index:
-                    do_write = True
-
-            if not do_write:
-                continue
-
-            features, labels = torch.load(replay_path)
-            print("features.shape:", features.shape) if debug else None
-            print("labels.shape::", labels.shape) if debug else None
-
-            replay_ds = ReplayTensorDataset(features, labels, seq_len=SEQ_LEN)
-            # why does it only work with this???
-            # print(len(replay_ds))
-            td_list.append(replay_ds)
+            td_list.append(ReplayTensorDataset(replay_path, seq_len=SEQ_LEN))
 
         except Exception as e:
-            traceback.print_exc()
+            print(e)
 
     return td_list
 
@@ -220,10 +202,10 @@ def main_worker(device):
     print("length of replay_files:", len(replay_files)) if debug else None
     replay_files.sort()
 
-    train_list = getReplayData(
+    train_list = get_replay_data(
         PATH, replay_files, from_index=TRAIN_FROM, end_index=TRAIN_FROM + TRAIN_NUM
     )
-    val_list = getReplayData(
+    val_list = get_replay_data(
         PATH, replay_files, from_index=VAL_FROM, end_index=VAL_FROM + VAL_NUM
     )
 

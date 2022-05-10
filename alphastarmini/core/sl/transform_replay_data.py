@@ -100,8 +100,8 @@ flags.DEFINE_integer(
 )
 flags.DEFINE_string(
     "replay_version",
-    "3.16.1",  # 4.10.0.75689
-    # "4.1.2",  # 4.10.0.75689
+    # "3.16.1",  # 4.10.0.75689
+    "4.1.2",  # 4.10.0.75689
     "the replays released by blizzard are all 3.16.1 version",
 )
 
@@ -121,8 +121,8 @@ flags.DEFINE_string(
 )
 flags.DEFINE_string(
     "save_path_tensor",
-    # "./data/replay_data_tensor_abyssal-reef/",
-    "./data/replay_data_tensor_new_small/",
+    "./data/replay_data_tensor_abyssal-reef/",
+    # "./data/replay_data_tensor_new_small/",
     "path to replays_save replay data tensor",
 )
 FLAGS(sys.argv)
@@ -144,6 +144,7 @@ elif FLAGS.save_type == 1:
     SAVE_TYPE = SaveType.python_pickle
 else:
     SAVE_TYPE = SaveType.numpy_array
+
 
 def check_info(replay_info):
     map_name = replay_info.map_name
@@ -394,7 +395,7 @@ def test(on_server=False):
         for i, replay_file in enumerate(tqdm(replay_files)):
             try:
                 replay_path = REPLAY_PATH + replay_file
-                print('replay_path:', replay_path)
+                print("replay_path:", replay_path)
 
                 replay_data = run_config.replay_data(replay_path)
                 replay_info = controller.replay_info(replay_data)

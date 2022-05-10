@@ -20,6 +20,7 @@ Thumbs.db
 *.cache
 *.ilk
 *.log
+*.ipynb_checkpoints
 [Bb]in
 [Dd]ebug*/
 *.lib

@@ -17,7 +17,7 @@ import torch.nn as nn
 from absl import app, flags
 from tensorboardX import SummaryWriter
 from torch.optim import AdamW, RMSprop
-from torch.optim.lr_scheduler import StepLR, OneCycleLR
+from torch.optim.lr_scheduler import OneCycleLR, StepLR
 from torch.utils.data import ConcatDataset, DataLoader
 from tqdm import tqdm
 
@@ -49,7 +49,7 @@ parser.add_argument(
 parser.add_argument(
     "-p2",
     "--path2",
-    default="./data/replay_data_tensor_new_small_AR/",
+    default="/home/cozy/Documents/projects/sc2_rl/mini-AlphaStar/data/replay_data_tensor_abyssal-reef/",
     help="The path where data stored",
 )
 parser.add_argument(
@@ -91,7 +91,7 @@ MODEL_PATH_TRAIN = "./model_train/"
 if not os.path.exists(MODEL_PATH_TRAIN):
     os.mkdir(MODEL_PATH_TRAIN)
 
-RESTORE_NAME = "sl_21-12-21_09-11-12"
+RESTORE_NAME = "sl_22-05-07_16-49-23"
 RESTORE_PATH = MODEL_PATH + RESTORE_NAME + ".pth"
 RESTORE_PATH_TRAIN = MODEL_PATH_TRAIN + RESTORE_NAME + ".pkl"
 
@@ -103,11 +103,11 @@ LOAD_STATE_DICT = False
 LOAD_ALL_PKL = False
 LOAD_CHECKPOINT = True
 
-TRAIN_FROM = 10  # 20
-TRAIN_NUM = 80  # 60
+TRAIN_FROM = 21
+TRAIN_NUM = 175
 
 VAL_FROM = 0
-VAL_NUM = 10
+VAL_NUM = 20
 
 # hyper parameters
 # use the same as in RL
@@ -118,11 +118,11 @@ VAL_NUM = 10
 BATCH_SIZE = 3 * AHP.batch_size
 SEQ_LEN = int(AHP.sequence_length * 0.5)
 
-print('BATCH_SIZE:', BATCH_SIZE) if debug else None
-print('SEQ_LEN:', SEQ_LEN) if debug else None
+print("BATCH_SIZE:", BATCH_SIZE) if debug else None
+print("SEQ_LEN:", SEQ_LEN) if debug else None
 
-NUM_EPOCHS = 15
-LEARNING_RATE = 1e-3
+NUM_EPOCHS = 20
+LEARNING_RATE = 1e-4
 WEIGHT_DECAY = 1e-5
 
 CLIP_VALUE = 0.5  # SLTHP.clip
@@ -133,27 +133,13 @@ torch.manual_seed(SLTHP.seed)
 np.random.seed(SLTHP.seed)
 
 
-def getReplayData(path, replay_files, from_index=0, end_index=None):
+def get_replay_data(path, replay_files, from_index=0, end_index=None):
     td_list = []
-    for replay_file in tqdm(replay_files):
+    replay_files = replay_files[from_index:end_index]
+    for i, replay_file in enumerate(tqdm(replay_files, total=len(replay_files))):
         try:
             replay_path = path + replay_file
-
-            do_write = False
-            if i >= from_index:
-                if end_index is None:
-                    do_write = True
-                elif end_index is not None and i < end_index:
-                    do_write = True
-
-            if not do_write:
-                continue
-
-            features, labels = torch.load(replay_path)
-            print("features.shape:", features.shape) if debug else None
-            print("labels.shape:", labels.shape) if debug else None
-
-            td_list.append(ReplayTensorDataset(features, labels, seq_len=SEQ_LEN))
+            td_list.append(ReplayTensorDataset(replay_path, seq_len=SEQ_LEN))
 
         except Exception as e:
             print(e)
@@ -196,8 +182,8 @@ def main_worker(device):
         optimizer = AdamW(net.parameters())
         optimizer.load_state_dict(checkpoint["optimizer"])
 
-        # scheduler = StepLR(optimizer, step_size=STEP_SIZE)
-        # scheduler.load_state_dict(checkpoint["scheduler"])
+        scheduler = StepLR(optimizer, step_size=STEP_SIZE)
+        scheduler.load_state_dict(checkpoint["scheduler"])
 
         batch_iter = checkpoint["batch_iter"]
         print("batch_iter is", batch_iter)
@@ -216,19 +202,23 @@ def main_worker(device):
     print("length of replay_files:", len(replay_files)) if debug else None
     replay_files.sort()
 
-    train_list = getReplayData(
+    # train_replay_paths = get_replay_paths(
+    #     PATH, replay_files, from_index=TRAIN_FROM, end_index=TRAIN_FROM + TRAIN_NUM, debug=debug
+    # )
+    # val_replay_paths = get_replay_paths(
+    #     PATH, replay_files, from_index=VAL_FROM, end_index=VAL_FROM + VAL_NUM, debug=debug
+    # )
+    train_replay_ds = get_replay_data(
         PATH, replay_files, from_index=TRAIN_FROM, end_index=TRAIN_FROM + TRAIN_NUM
     )
-
-    val_list = getReplayData(
+    val_replay_ds = get_replay_data(
         PATH, replay_files, from_index=VAL_FROM, end_index=VAL_FROM + VAL_NUM
     )
 
-    print("len(train_list)", len(train_list)) if debug else None
-    print("len(val_list)", len(val_list)) if debug else None
-
-    train_set = ConcatDataset(train_list)
-    val_set = ConcatDataset(val_list)
+    print("len(train_list)", len(train_replay_ds)) if debug else None
+    print("len(val_list)", len(val_replay_ds)) if debug else None
+    train_set = ConcatDataset(train_replay_ds)
+    val_set = ConcatDataset(val_replay_ds)
 
     print("len(train_set)", len(train_set)) if debug else None
     print("len(val_set)", len(val_set)) if debug else None
@@ -248,8 +238,6 @@ def main_worker(device):
         num_workers=NUM_WORKERS,
         pin_memory=False,
     )
-    del train_set, val_set
-    gc.collect()
 
     print("len(train_loader)", len(train_loader)) if debug else None
     print("len(val_loader)", len(val_loader)) if debug else None
@@ -258,7 +246,8 @@ def main_worker(device):
     for _ in enumerate(train_loader):
         steps_per_epoch += 1
 
-    scheduler = OneCycleLR(optimizer, max_lr=LEARNING_RATE, total_steps=NUM_EPOCHS * steps_per_epoch)
+    # scheduler = OneCycleLR(optimizer, max_lr=LEARNING_RATE, total_steps=NUM_EPOCHS * steps_per_epoch)
+    scheduler = StepLR(optimizer, step_size=STEP_SIZE)
 
     train(
         net,
